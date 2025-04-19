@@ -9,7 +9,7 @@ pub struct RefundOffer<'info>{
     #[account(mut)]
     pub maker : Signer<'info>,
 
-    pub token_mint_a : InterfaceAccount<'info,TokenAccount>,
+    pub token_mint_a : InterfaceAccount<'info,Mint>,
 
     #[account(
         mut,
@@ -43,3 +43,31 @@ pub struct RefundOffer<'info>{
 // Handle the refund offer instruction by:
 // 1. Returning the tokens from the vault to the maker's account
 // 2. Closing the vault and returning the rent to the maker
+
+pub fn refund_offer(context:Context<RefundOffer>)->Result<()>{
+    let offer_account_seeds = &[
+        b"offer",
+        context.accounts.maker.to_account_info().key.as_ref(),
+        &context.accounts.offer.id.to_le_bytes()[..],
+        &[context.accounts.offer.bump]
+    ];
+
+    let signer_seeds = Some(&offer_account_seeds[..]);
+
+    // tranfer the tokens from the vault to the maker's account
+    transfer_tokens(&context.accounts.vault,
+        &context.accounts.maker_token_account_a, 
+        &context.accounts.vault.amount, 
+        &context.accounts.token_mint_a, 
+        &context.accounts.offer.to_account_info(), 
+        &context.accounts.token_program, 
+        signer_seeds);
+    
+    //Close vault and return rent to maker
+    close_token_account(
+        &context.accounts.vault, 
+        &context.accounts.maker.to_account_info(),
+        &context.accounts.offer.to_account_info(), 
+        &context.accounts.token_program, 
+        signer_seeds)
+}

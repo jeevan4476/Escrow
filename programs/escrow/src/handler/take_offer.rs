@@ -53,7 +53,7 @@ pub struct TakeOffer<'info>{
         close=maker,
         has_one=maker,
         has_one=token_mint_b,
-        seeds = [b"offer", maker.key().as_ref(), id.to_le_bytes().as_ref()],
+        seeds = [b"offer", maker.key().as_ref(), offer.id.to_le_bytes().as_ref()],
         bump=offer.bump
     )]
     pub offer: Box<Account<'info, Offer>>,
@@ -79,7 +79,7 @@ pub fn take_offer(context:Context<TakeOffer> )->Result<()>{
             &context.accounts.offer.token_b_wanted_amount, 
         &context.accounts.token_mint_b, 
         &context.accounts.taker.to_account_info(), 
-        owning_pda_seeds,
+        &context.accounts.token_program,
     None)?;
 
     let offer_account_seeds = &[
@@ -100,11 +100,11 @@ pub fn take_offer(context:Context<TakeOffer> )->Result<()>{
         &context.accounts.token_program,
         signer_seeds);
 
-        close_token_account(
+    close_token_account(
             &context.accounts.vault,
             &context.accounts.taker.to_account_info(),
             &context.accounts.offer.to_account_info(),
             &context.accounts.token_program,
-            signers_seeds,
-        )
+            signer_seeds,
+    )
 }
