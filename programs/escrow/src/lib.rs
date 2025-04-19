@@ -1,14 +1,13 @@
 #![allow(unexpected_cfgs)]
 pub mod constants;
 pub mod error;
-pub mod handler;
+pub mod handlers;
 pub mod state;
 
 use anchor_lang::prelude::*;
 
 pub use constants::*;
-pub use handler::*;
-pub use state::*;
+pub use handlers::*;
 
 declare_id!("F8CYg2tDt59xQn5K9kbL3qCGbgo8YCvf3iQBvZcJwRuJ");
 
@@ -22,14 +21,14 @@ pub mod escrow {
         token_a_offered_amount: u64,
         token_b_wanted_amount: u64,
     ) -> Result<()> {
-        handler::make_offer::make_offer(context, id, token_a_offered_amount, token_b_wanted_amount)
+        handlers::make_offer::make_offer(context, id, token_a_offered_amount, token_b_wanted_amount)
     }
 
     pub fn take_offer(context: Context<TakeOffer>) -> Result<()> {
-        handler::take_offer::take_offer(context)
+        handlers::take_offer::take_offer(context)
     }
 
     pub fn refund_offer(context: Context<RefundOffer>) -> Result<()> {
-        handler::refund::refund_offer(context)
+        handlers::refund::refund_offer(context)
     }
 }
